@@ -1,0 +1,4 @@
+﻿  whatthehell.cpp
+C:\Users\patip\source\repos\projectgame\projectgame\whatthehell.cpp(7,14): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
+C:\Users\patip\source\repos\projectgame\projectgame\whatthehell.cpp(7,17): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
+  projectgame.vcxproj -> C:\Users\patip\source\repos\projectgame\Debug\projectgame.exe
