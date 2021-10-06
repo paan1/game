@@ -36,15 +36,7 @@ void setcursor(bool visible)
 	lpCursor.dwSize = 20;
 	SetConsoleCursorInfo(console, &lpCursor);
 }
-char cursor(int x, int y)
-{
-	HANDLE hStd = GetStdHandle(STD_OUTPUT_HANDLE);
-	char buf[2]; COORD c = { x,y }; DWORD num_read;
-	if (!ReadConsoleOutputCharacter(hStd, (LPTSTR)buf, 1, c, (LPDWORD)&num_read))
-		return '\0';
-	else
-		return buf[0];
-}
+
 int setMode()
 {
 	rHnd = GetStdHandle(STD_INPUT_HANDLE);
@@ -65,21 +57,19 @@ void fill_buffer_to_console()
 	WriteConsoleOutputA(wHnd, consoleBuffer, bufferSize, characterPos,
 		&windowSize);
 }
-void draw_ship(int x, int y)
+void draw_ship()
 {
-	COORD c = { x, y };
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
-	char a[] = "<-0->";
-	consoleBuffer[(c.X - 4) + screen_x * c.Y].Char.AsciiChar = '<';
-	consoleBuffer[(c.X - 3) + screen_x * c.Y].Char.AsciiChar = '-';
-	consoleBuffer[(c.X - 2) + screen_x * c.Y].Char.AsciiChar = '0';
-	consoleBuffer[(c.X - 1) + screen_x * c.Y].Char.AsciiChar = '-';
-	consoleBuffer[c.X + screen_x * c.Y].Char.AsciiChar = '>';
-	consoleBuffer[(c.X - 4) + screen_x * c.Y].Attributes = color;
-	consoleBuffer[(c.X - 3) + screen_x * c.Y].Attributes = color;
-	consoleBuffer[(c.X - 2) + screen_x * c.Y].Attributes = color;
-	consoleBuffer[(c.X - 1) + screen_x * c.Y].Attributes = color;
-	consoleBuffer[c.X + screen_x * c.Y].Attributes = color;
+	
+	consoleBuffer[(ship.X - 2) + screen_x * ship.Y].Char.AsciiChar = '<';
+	consoleBuffer[(ship.X - 1) + screen_x * ship.Y].Char.AsciiChar = '-';
+	consoleBuffer[(ship.X - 0) + screen_x * ship.Y].Char.AsciiChar = '0';
+	consoleBuffer[(ship.X + 1) + screen_x * ship.Y].Char.AsciiChar = '-';
+	consoleBuffer[ship.X + 2 + screen_x * ship.Y].Char.AsciiChar = '>';
+	consoleBuffer[(ship.X - 2) + screen_x * ship.Y].Attributes = color;
+	consoleBuffer[(ship.X - 1) + screen_x * ship.Y].Attributes = color;
+	consoleBuffer[(ship.X - 0) + screen_x * ship.Y].Attributes = color;
+	consoleBuffer[(ship.X + 1) + screen_x * ship.Y].Attributes = color;
+	consoleBuffer[ship.X + 2 +screen_x * ship.Y].Attributes = color;
 
 }
 void star_fall()
@@ -94,6 +84,11 @@ void star_fall()
 		else 
 		{
 			star[i] = { star[i].X,star[i].Y + 1 };
+			if (ship.X - 2 <= star[i].X && star[i].X <= ship.X + 2 && star[i].Y == ship.Y)
+			{
+				star[i] = { SHORT(rand() % screen_x), 1 };
+				check++;
+			}
 		}
 	}
 }
@@ -125,19 +120,7 @@ void clear_buffer()
 		}
 	}
 	
-	void check_star()
-	{
-		
-		for (int i = 0; i < scount; i++)
-		{
-			if ((star[i].X == ship.X || star[i].X == ship.X + 1 || star[i].X == ship.X + 2) && star[i].Y == ship.Y)
-			{
-				star[i] = { SHORT(rand() % screen_x), 1 };
-				check++;
-			}
-			
-		}
-	}
+	
 
 	
 int main()
@@ -153,7 +136,7 @@ int main()
 	setConsole(screen_x, screen_y);
 	setMode();
 	setcursor(0);
-	while (play && check <= 10)
+	while (play && check < 10)
 	{
 		GetNumberOfConsoleInputEvents(rHnd, &numEvents);
 		if (numEvents != 0) {
@@ -165,19 +148,19 @@ int main()
 					if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE) {
 						play = false;
 					}
-					color = rand() % 256;
+					color = rand() % 15+1;
 				}
 				else if (eventBuffer[i].EventType == MOUSE_EVENT) {
 					int posx = eventBuffer[i].Event.MouseEvent.dwMousePosition.X;
 					int posy = eventBuffer[i].Event.MouseEvent.dwMousePosition.Y;
 					if (eventBuffer[i].Event.MouseEvent.dwButtonState &
 						FROM_LEFT_1ST_BUTTON_PRESSED) {
-						color = rand() % 256;
+						color = rand() % 15+1;
 					}
 					else if (eventBuffer[i].Event.MouseEvent.dwEventFlags & MOUSE_MOVED) {
 						
-						posX = posx;
-						posY = posy;
+						ship.X = posx;
+						ship.Y = posy;
 						
 					}
 				}
@@ -187,10 +170,9 @@ int main()
 			star_fall();
 			clear_buffer();
 			fill_star_to_buffer();
-			draw_ship(posX, posY);
+			draw_ship();
 			fill_buffer_to_console();
-			check_star();
-			Sleep(50);
+			Sleep(200);
 	
 	}
 	
