@@ -15,8 +15,6 @@ CHAR_INFO consoleBuffer[screen_x * screen_y];
 COORD characterPos = { 0,0 };
 COORD ship;
 DWORD color = 7;
-
-bool play = true;
 int posX = screen_x / 2;
 int posY = screen_y - 1;
 int check = 0;
@@ -130,7 +128,6 @@ int main()
 	setConsole(screen_x, screen_y);
 	init_star();
 	i = 0;
-	bool play = true;
 	DWORD numEvents = 0;
 	DWORD numEventsRead = 0;
 	setConsole(screen_x, screen_y);
